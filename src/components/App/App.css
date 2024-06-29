@@ -1,0 +1,11 @@
+.main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  padding-top: 40px;
+  background-color:#beb8b8;
+  width: 100vw;
+  min-height: 100vh;
+}

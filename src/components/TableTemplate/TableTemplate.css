@@ -1,0 +1,88 @@
+.table {
+  border-collapse: separate;
+  border-spacing: 0px 10px;
+  background-color: #FFF;
+  border-radius: 0 0 10px 10px;
+  padding: 10px;
+}
+
+.table__container {
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.table__characteristics {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  /* padding: 0; */
+  border: 0;
+  clip: rect(0 0 0 0); 
+  overflow: hidden;
+}
+
+.table_opened {
+  visibility: visible;
+  position: relative;
+  opacity: 1;
+  transition: all 10s ease;
+} 
+
+.table__train-row:hover {
+  background-color: #787676;
+  cursor: pointer;
+  transition: background-color 500ms ease-out;
+}
+
+.table__title-container {
+  font-size: 10px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  background-color: inherit;
+  border-radius: 10px 10px 0 0;
+  text-align: start;
+  padding: inherit;
+}
+
+.table__subtitle-container {
+  background-color: #d5d3d3;
+}
+
+.table__subtitle {
+  padding: 3px 10px;
+  border: 10px;
+  color: #787676;
+  text-align: start;
+}
+
+.table__characteristics-subtitle {
+  text-align: center;
+}
+
+.table__data {
+  padding: 3px 10px;
+  border-bottom: 2px solid #d5d3d3;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  line-height: 90%;
+}
+
+.table__characteristics-data {
+  padding: 0 50px;
+}
+
+.table__input {
+  max-width: 60px;
+  text-align: center;
+}
+
+.table__input:hover {
+  box-shadow: rgba(36, 39, 40, 0.12) 0px 2px 4px 0px, rgba(15, 16, 17, 0.32) 0px 2px 16px 0px;
+}
+
+.error {
+  outline: 2px solid red;
+}
