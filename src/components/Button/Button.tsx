@@ -28,7 +28,7 @@ const Button: FC<IButtonProps> = ({ invalidFieldCoordinate = [] }) => {
     } else {
       setIsButtonDisabled(true)
     }
-  }, [invalidFieldCoordinate, deepEqual])
+  }, [invalidFieldCoordinate, selectedTrain, originalObject, trains, deepEqual])
 
   const handleSubmit = () => {
     const speed: number[] = []    
