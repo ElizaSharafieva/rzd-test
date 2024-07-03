@@ -1,55 +1,61 @@
-import { useState, useEffect } from 'react'
+import { useState, FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import axios from 'axios'
+import '../TableTemplate/TableTemplate.css'
 import TableTemplate from '../TableTemplate/TableTemplate'
 import { updateCharacteristic } from '../../store/trainsReducer'
-// import Button from '../Button/Button'
+import { RootState } from '../../store/store'
+import Button from '../Button/Button'
 
-function TrainCharacteristicsTable(props) {
+interface ITrainCharacteristicsTableProps {
+  isCharacteristicsTable: boolean
+}
+
+const TrainCharacteristicsTable: FC<ITrainCharacteristicsTableProps> = (props) => {
 
   const dispatch = useDispatch()
-  const [valid, setValid] = useState(true);
-  const [invalidFieldCoordinate, setInvalidFieldCoordinate] = useState([]);
+  const [invalidFieldCoordinate, setInvalidFieldCoordinate] = useState<string[]>([])
+  const trains = useSelector((state: RootState) => state.trains.trains)
+  const selectedTrain = useSelector((state: RootState) => state.trains.selectedTrain)
 
-  const trains = useSelector(state => state.trains.trains)
-  const selectedTrain = useSelector(state => state.trains.selectedTrain)
-
-  const selectedTrainCharacteristics = trains[selectedTrain.id].characteristics.map(i => {
+  const selectedTrainCharacteristics = trains[selectedTrain!.id].characteristics.map(i => {
     return [i.engineAmperage, i.force, i.speed]
   })
 
-  function toggleValidation(index, column, isValid) {
-    (!isValid) ? 
-      invalidFieldCoordinate.includes(index + '' + column + '-' + selectedTrain.id) ?
-      console.log('уже есть') 
-      : setInvalidFieldCoordinate([...invalidFieldCoordinate, index + '' + column + '-' + selectedTrain.id]) 
-      : setInvalidFieldCoordinate(invalidFieldCoordinate.filter((item) => {return item !== index + '' + column + '-' + selectedTrain.id}))
+  const toggleValidation = (index: number, column: number, isValid: boolean) => {
+    const coordinate = `${index}${column}-${selectedTrain!.id}`
+    if (!isValid) {
+      if (!invalidFieldCoordinate.includes(coordinate)) {
+        setInvalidFieldCoordinate([...invalidFieldCoordinate, coordinate])
+      }
+    } else {
+      setInvalidFieldCoordinate(invalidFieldCoordinate.filter((item) => item !== coordinate))
+    }
   }
 
-  const validateCharacteristic = (value, name, index, column) => {
-    const inputValue = Number(value);
+  const validateCharacteristic = (value: string, name: string, index: number, column: number) => {
+    const inputValue = Number(value)
+    const basicValidation = !Number.isNaN(inputValue) && value !== ''
+    let isValid = false
     switch(name) {
       case 'engineAmperage':
-        const isInteger = !Number.isNaN(inputValue) && value !== '' && value[value.length - 1] !== '.' && Number.isInteger(inputValue) && inputValue >= 0;
-          toggleValidation(index, column, isInteger)
-          break;
+        isValid = basicValidation && value[value.length - 1] !== '.' && Number.isInteger(inputValue) && inputValue >= 0
+        break
 
       case 'force': 
-        const isFloat = !Number.isNaN(inputValue) && !Number.isInteger(inputValue) && inputValue > 0 && value !== '';
-          toggleValidation(index, column, isFloat)
-          break;
+        isValid = basicValidation && !Number.isInteger(inputValue) && inputValue > 0 
+        break
 
       case 'speed': 
-        const isInteger2 = !Number.isNaN(inputValue) && value !== '' && value[value.length - 1] !== '.' && Number.isInteger(inputValue) && inputValue >0;
-          toggleValidation(index, column, isInteger2)
-          break;
-      }
-  };
+        isValid = basicValidation && value[value.length - 1] !== '.' && Number.isInteger(inputValue) && inputValue >0
+        break
+    }
+    toggleValidation(index, column, isValid)
+  }
 
-  function handleChangeValue(index, column, evt, name) {
-    setValid(validateCharacteristic(evt, name, index, column))
-    dispatch(updateCharacteristic({index, column, evt, name}))
-  };
+  function handleChangeValue(index: number, column: number, value: string, name: string) {
+    validateCharacteristic(value, name, index, column)
+    dispatch(updateCharacteristic({index, name, value}))
+  }
 
   const column = [
     { header: 'Ток двигателя'},
@@ -58,17 +64,18 @@ function TrainCharacteristicsTable(props) {
   ]
 
   return (
+  <div className='table__container'>
     <TableTemplate 
       name='characteristics' 
       title = 'Характеристика'
-      isOpen={props.isOpen}
       column={column} 
       data={selectedTrainCharacteristics} 
       handleChangeValue = {handleChangeValue}
       isCharacteristicsTable = {props.isCharacteristicsTable}
-      valid = {valid}
       invalidFieldCoordinate={invalidFieldCoordinate}
     />
+    <Button invalidFieldCoordinate={invalidFieldCoordinate}/>
+  </div>
   )
 }
 

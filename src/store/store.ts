@@ -1,12 +1,11 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit"; 
-import trainsReducer from './trainsReducer';
-
-const rootReducer = combineReducers(
-  {
-    trains: trainsReducer
-  }
-)
+import { configureStore } from "@reduxjs/toolkit"
+import trainsReducer from './trainsReducer'
 
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: {
+    trains: trainsReducer,
+  },
 })
+
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

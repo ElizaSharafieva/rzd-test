@@ -1,31 +1,50 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, FC, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import './Button.css'
+import { RootState } from '../../store/store'
+import _isEqual from 'lodash/isEqual'
+import {ITrain} from '../../store/trainsReducer'
 
-function Button(props) {
+interface IButtonProps {
+  invalidFieldCoordinate: string[] | undefined
+}
 
-  const trains = useSelector(state => state.trains.trains)
-  const selectedTrain = useSelector(state => state.trains.selectedTrain)
+const Button: FC<IButtonProps> = ({ invalidFieldCoordinate = [] }) => {
 
-  const [originalObject, setOriginalObject] = useState(trains);
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const { trains, selectedTrain } = useSelector((state: RootState) => state.trains)
+
+  const [originalObject, setOriginalObject] = useState<Record<number, ITrain>>(trains)
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true)
+
+  const deepEqual = useCallback(<T,>(obj1: T, obj2: T): boolean => {
+    return _isEqual(obj1, obj2)
+  }, [])
 
   useEffect(() => {
-    if (selectedTrain && JSON.stringify(originalObject[selectedTrain.id].characteristics) !== JSON.stringify(trains[selectedTrain.id].characteristics))
-      {setIsButtonDisabled((props.invalidFieldCoordinate.some((item) => {
-        return (Number(item.substring(item.lastIndexOf('-')+1)) === selectedTrain.id)
-      })))} else setIsButtonDisabled(true)
-  }, [props.invalidFieldCoordinate, selectedTrain])
+    if (selectedTrain && !deepEqual(originalObject[selectedTrain.id].characteristics, trains[selectedTrain.id].characteristics)) {
+      setIsButtonDisabled(
+        invalidFieldCoordinate.some((item) => Number(item.substring(item.lastIndexOf('-')+1)) === selectedTrain.id)
+      )
+    } else {
+      setIsButtonDisabled(true)
+    }
+  }, [invalidFieldCoordinate, deepEqual])
 
-  const handleSubmit = () => { 
-    const speed = [];    
-    trains[selectedTrain.id].characteristics.forEach((item) => {
+  const handleSubmit = () => {
+    const speed: number[] = []    
+    trains[selectedTrain!.id].characteristics.forEach((item) => {
       speed.push(Number(item.speed))
     })
     console.log(speed.sort((a,b) => a-b))
     setIsButtonDisabled(true)
-    setOriginalObject(Object.assign({}, originalObject, trains))
-  };
+    setOriginalObject(prevOriginalObject => ({
+      ...prevOriginalObject,
+      [selectedTrain!.id]: {
+        ...prevOriginalObject[selectedTrain!.id],
+        characteristics: [...trains[selectedTrain!.id].characteristics]
+      }
+    }))
+  }
 
   return (
     <button 
@@ -39,4 +58,4 @@ function Button(props) {
   )
 }
 
-export default Button;
+export default Button

@@ -1,33 +1,29 @@
-import { useEffect, FC } from 'react'
+import { useEffect, FC, memo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-// import{ IfcSampleInterface } from './IfcSampleInterface';
 import TableTemplate from '../TableTemplate/TableTemplate'
-import { fetchTrains } from '../../store/trainsReducer'
+import { fetchTrains, selectTrain} from '../../store/trainsReducer'
+import { AppDispatch } from '../../store/store'
+import { RootState } from '../../store/store'
+import { ITrain } from '../../store/trainsReducer'
 
-interface TrainTableProps {
-  onTableClick: (index: number) => void;
-}
+const TrainTable: FC = memo(() => {
 
-// interface Train {
-//   id: number;
-//   name: string;
-//   description: string;
-// }
+  const dispatch = useDispatch<AppDispatch>()
+  const trains = useSelector((state: RootState) => state.trains.trains)
 
-const TrainTable: FC<TrainTableProps> = ({ onTableClick }) => {
+  const convertedTrains = trains.map((train: ITrain) => [train.name, train.description])
 
-  const dispatch = useDispatch();
-  const trains = useSelector(state => state.trains.trains)
-
-  const newtrains = trains.map((i) => [i.name, i.description])
+  const handleClick = (index: number) => {
+    dispatch(selectTrain(index))
+  }
 
   useEffect(() => {
     dispatch(fetchTrains())
   }, [dispatch])
   
   const column = [
-    { header: 'Название'},
-    { header: 'Описание'},
+    { header: 'Название' },
+    { header: 'Описание' },
   ]
 
   return (
@@ -35,10 +31,10 @@ const TrainTable: FC<TrainTableProps> = ({ onTableClick }) => {
       name = 'train'
       title = 'Поезда'
       column = {column} 
-      data = {newtrains} 
-      onClick = {onTableClick}
+      data = {convertedTrains} 
+      onClick = {handleClick}
     />
   )
-}
+})
 
 export default TrainTable

@@ -1,65 +1,88 @@
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
+import { FC, ChangeEvent } from 'react'
 import './TableTemplate.css'
-import {selectTrain} from '../../store/trainsReducer'
-import Button from '../Button/Button'
+import { RootState } from '../../store/store'
 
-function TableTemplate({ name, title, column, data, isOpen, onClick, isCharacteristicsTable, handleChangeValue, valid, invalidFieldCoordinate }) {
+interface IColumn {
+  header: string
+}
 
-  const selectedTrain = useSelector(state => state.trains.selectedTrain)
+interface ITableTemplateProps {
+  name: string
+  title: string
+  column: IColumn[]
+  data: (string | number | undefined)[][]
+  onClick?: (index: number) => void
+  isCharacteristicsTable?: boolean
+  handleChangeValue?: (rowIndex: number, colIndex: number, value: string, name: string) => void
+  invalidFieldCoordinate?: string []
+}
+
+const TableTemplate: FC<ITableTemplateProps> = (props) => {
+
+  const { 
+    name, 
+    title, 
+    column, 
+    data, 
+    onClick, 
+    isCharacteristicsTable, 
+    handleChangeValue, 
+    invalidFieldCoordinate 
+  } = props
+
+  const selectedTrain = useSelector((state: RootState) => state.trains.selectedTrain)
+
+  const columns = column.map((item, index) => (
+    <th key={index} className={`table__subtitle table__${name}-subtitle`}>{item.header}</th>
+  ))
+  
+  const rows = data.map((item, rowIndex) => (
+    <tr
+      key={rowIndex}
+      onClick={selectedTrain?.id !== rowIndex && onClick? () => onClick(rowIndex) : undefined}
+      className={`table__${name}-row`}
+    >
+      {item.map((data, columnIndex) => (
+        <td key={columnIndex} className={`table__data table__${name}-data`}>
+          {isCharacteristicsTable ? (
+            <input
+              key={`${rowIndex}-${columnIndex}`}
+              name={columnIndex === 0 ? 'engineAmperage' : columnIndex === 1 ? 'force' : 'speed'}
+              id={String(columnIndex)}
+              onChange={handleChangeValue ? (evt: ChangeEvent<HTMLInputElement>) =>
+              handleChangeValue(rowIndex, columnIndex, evt.target.value, evt.target.name)
+              : undefined}
+              className={invalidFieldCoordinate && invalidFieldCoordinate.includes(`${rowIndex}${columnIndex}-${selectedTrain?.id}`) ? 'table__input error' : 'table__input'}
+              value={data === undefined ? '-' : data}
+              type='text'
+            />
+          ) 
+          : 
+          (
+            data
+          )}
+        </td>
+      ))}
+    </tr>
+  ))
   
   return (
     <div className='table__container'>
-      <table className={`table table__${name} ${isOpen ? 'table_opened' : ''}`}>
+      <table className={`table table__${name} ${isCharacteristicsTable ? 'table_opened' : ''}`}>
         <caption className='table__title-container'>
           <h1>{title}</h1>
-          {
-            isCharacteristicsTable ? <h2>{selectedTrain.name}</h2> : ''
-          }
+          {isCharacteristicsTable && selectedTrain && <h2>{selectedTrain.name}</h2>}
         </caption>
         <thead>
           <tr className='table__subtitle-container'>
-            {column.map((item, index) => 
-              <th key={index} className={`table__subtitle table__${name}-subtitle`}>{item.header}</th>
-            )}
+            {columns}
           </tr>
         </thead>
         <tbody>
-          {  
-            data.map((item, index) => 
-              <tr onClick={isCharacteristicsTable ? null :() => onClick(index)} className={`table__${name}-row`} key={index}>
-                {
-                  item && item.map((data, column) => {
-                    return (
-                      <td key={column} className={`table__data table__${name}-data`}>
-                        {isCharacteristicsTable ? 
-                          <input 
-                            name={column === 0 ? 'engineAmperage' : column === 1 ? 'force' : 'speed'}
-                            id={column} 
-                            index={index}
-                            onChange={((evt) => handleChangeValue(index, column, evt.target.value, evt.target.name))}
-                            className={invalidFieldCoordinate.includes(index + '' + column + '-' + selectedTrain.id) ? 'table__input error' : 'table__input'}
-                            value={data === undefined ? '-' : data} 
-                            key={index} 
-                            type='text'
-                          />
-                          : data}
-                      </td>
-                    )
-                  })
-                }
-              </tr>
-            ) 
-          } 
+          {rows}
         </tbody>
       </table>
-      {
-        isCharacteristicsTable ? 
-          <Button
-            invalidFieldCoordinate={invalidFieldCoordinate}
-            data = {data}
-          /> 
-          : ''
-      }
     </div>
   )
 }
