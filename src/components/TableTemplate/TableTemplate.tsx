@@ -49,7 +49,7 @@ const TableTemplate: FC<ITableTemplateProps> = (props) => {
             <input
               key={`${rowIndex}-${columnIndex}`}
               name={columnIndex === 0 ? 'engineAmperage' : columnIndex === 1 ? 'force' : 'speed'}
-              id={String(columnIndex)}
+              id={String(`${rowIndex}${columnIndex}`)}
               onChange={handleChangeValue ? (evt: ChangeEvent<HTMLInputElement>) =>
               handleChangeValue(rowIndex, columnIndex, evt.target.value, evt.target.name)
               : undefined}
